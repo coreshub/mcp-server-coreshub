@@ -1,0 +1,70 @@
+# Python 字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 编译文件
+*.so
+*.dylib
+*.dll
+
+# 分发和打包
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 单元测试/覆盖率报告
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# IDE相关
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 环境文件
+.env
+.venv
+env/
+venv/
+ENV/
+.python-version
+.env.*
+
+# 日志文件
+*.log
+logs/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 项目特定
+uv.lock
+.uv/
+
+
+#test
+test/
