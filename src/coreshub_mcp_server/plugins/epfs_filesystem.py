@@ -88,7 +88,7 @@ class GetEpfsBillInfoTool(BaseTool):
             "properties": {
                 "resource_id": {
                     "type": "string",
-                    "description": "资源ID,从上下文file_path字段获取",
+                    "description": "资源ID,从上下文resource_id字段获取",
                     "required": "True"
                 },
                 "zone": {
@@ -105,7 +105,7 @@ class GetEpfsBillInfoTool(BaseTool):
                 },
                 "user_id": {
                     "type": "string",
-                    "description": "容器实例的拥有者ID，可以从上下文字段user_id获取",
+                    "description": "容器实例的拥有者ID，从上下文字段user_id获取",
                     "default": settings.user_id,
                     "required": "True"
                 }

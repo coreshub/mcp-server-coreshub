@@ -19,7 +19,7 @@ class GetDistributedTrainingTool(BaseTool):
         return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     @staticmethod
-    def get_last_week_time() -> str:
+    def get_start_week_time() -> str:
         return (datetime.datetime.now() - datetime.timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
 
     @staticmethod
@@ -30,13 +30,13 @@ class GetDistributedTrainingTool(BaseTool):
                 "end_at": {
                     "type": "string",
                     "description": "结束时间",
-                    "default": f"现在为:{GetDistributedTrainingTool.get_current_time()}",
+                    "default": f"结束时间默认当前时间:{GetDistributedTrainingTool.get_current_time()}",
                     "required": "True"
                 },
                 "start_at": {
                     "type": "string",
                     "description": "开始时间",
-                    "default": f"默认为一周前:{GetDistributedTrainingTool.get_last_week_time()}",
+                    "default": f"开始时间默认一周前:{GetDistributedTrainingTool.get_start_week_time()}",
                     "required": "True"
                 },
                 "limit": {
@@ -74,7 +74,7 @@ class GetDistributedTrainingTool(BaseTool):
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
         end_at = arguments.get("end_at", self.get_current_time())
-        start_at = arguments.get("start_at", self.get_last_week_time())
+        start_at = arguments.get("start_at", self.get_start_week_time())
         limit = arguments.get("limit", 10)
         offset = arguments.get("offset", 0)
         zone = arguments.get("zone", "xb3")
@@ -126,8 +126,8 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
         return int(datetime.datetime.now().timestamp() * 1000000000)
 
     @staticmethod
-    def get_six_hours_ago_time() -> str:
-        return int((datetime.datetime.now() - datetime.timedelta(hours=6)).timestamp() * 1000000000)
+    def get_start_time() -> str:
+        return int((datetime.datetime.now() - datetime.timedelta(hours=12)).timestamp() * 1000000000)
 
     @staticmethod
     def model_json_schema() -> Dict[str, Any]:
@@ -137,13 +137,13 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
                 "end_time": {
                     "type": "string",
                     "description": "结束时间",
-                    "default": f"现在为:{GetDistributedTrainingDetailLogTool.get_current_time()}",
+                    "default": f"结束时间默认当前时间:{GetDistributedTrainingDetailLogTool.get_current_time()}",
                     "required": "True"
                 },
                 "start_time": {
                     "type": "string",
                     "description": "开始时间",
-                    "default": f"默认为六小时前:{GetDistributedTrainingDetailLogTool.get_six_hours_ago_time()}",
+                    "default": f"开始时间默认12小时前:{GetDistributedTrainingDetailLogTool.get_start_time()}",
                     "required": "True"
                 },
                 "fuzzy": {
@@ -173,7 +173,7 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
                 "zone": {
                     "type": "string",
                     "description": "区域",
-                    "default": "默认为xb3，可选xb2,hb2",
+                    "default": "默认为xb3，可选xb2、hb2",
                     "required": "True"
                 },
                 "owner": {
@@ -193,7 +193,7 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
         end_time = arguments.get("end_time", self.get_current_time())
-        start_time = arguments.get("start_time", self.get_six_hours_ago_time())
+        start_time = arguments.get("start_time", self.get_start_time())
         fuzzy = arguments.get("fuzzy", True)
         reverse = arguments.get("reverse", True)
         size = arguments.get("size", 100)
