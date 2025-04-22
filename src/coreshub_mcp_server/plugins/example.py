@@ -95,5 +95,5 @@ class SystemInfoPrompt(BasePrompt):
 
 
 # 注册工具和提示
-SystemInfoTool.register()
-SystemInfoPrompt.register()
+# SystemInfoTool.register()
+# SystemInfoPrompt.register()

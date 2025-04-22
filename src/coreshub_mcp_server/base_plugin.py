@@ -132,5 +132,4 @@ class BasePrompt(ABC):
         ToolRegistry.register_prompt(cls)
 
 
-# 导出符号
 __all__ = ['BaseTool', 'BasePrompt', 'ToolRegistry']
