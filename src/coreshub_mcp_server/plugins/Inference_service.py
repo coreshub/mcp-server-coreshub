@@ -96,15 +96,6 @@ class GetInferenceServiceLogTool(BaseTool):
     tool_description = "获取具体一个推理服务的日志"
 
     @staticmethod
-    def get_current_utc_time():
-        # 获取当前UTC时间
-        return datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.000Z')
-
-    def get_start_utc_time():
-        # 获取24小时前的UTC时间
-        return (datetime.datetime.utcnow() - datetime.timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.000Z')
-
-    @staticmethod
     def model_json_schema() -> Dict[str, Any]:
         # 获取当前UTC时间
         return {
@@ -113,13 +104,13 @@ class GetInferenceServiceLogTool(BaseTool):
                 "start_time": {
                     "type": "string",
                     "description": "开始UTC时间",
-                    "default": f"开始时间默认24小时前{GetInferenceServiceLogTool.get_start_utc_time()}",
+                    "default": f"开始时间默认24小时前{BaseTool.get_formatted_time(time_format='%Y-%m-%dT%H:%M:%S.000Z', offset_days=-1, use_utc=True)}",
                     "required": "非必须"
                 },
                 "end_time": {
                     "type": "string",
                     "description": "结束UTC时间",
-                    "default": f"结束时间默认当前时间{GetInferenceServiceLogTool.get_current_utc_time()}",
+                    "default": f"结束时间默认当前时间{BaseTool.get_formatted_time(time_format='%Y-%m-%dT%H:%M:%S.000Z', use_utc=True)}",
                     "required": "非必须"
                 },
                 "zone": {

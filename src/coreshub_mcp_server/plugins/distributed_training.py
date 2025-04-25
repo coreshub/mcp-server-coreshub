@@ -15,14 +15,6 @@ class GetDistributedTrainingTool(BaseTool):
     tool_description = "返回已经创建的分布式训练任务"
 
     @staticmethod
-    def get_current_time() -> str:
-        return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    @staticmethod
-    def get_start_week_time() -> str:
-        return (datetime.datetime.now() - datetime.timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
-
-    @staticmethod
     def model_json_schema() -> Dict[str, Any]:
         return {
             "type": "object",
@@ -30,13 +22,13 @@ class GetDistributedTrainingTool(BaseTool):
                 "end_at": {
                     "type": "string",
                     "description": "结束时间",
-                    "default": f"结束时间默认当前时间:{GetDistributedTrainingTool.get_current_time()}",
+                    "default": f"结束时间默认当前时间:{BaseTool.get_formatted_time()}",
                     "required": "True"
                 },
                 "start_at": {
                     "type": "string",
                     "description": "开始时间",
-                    "default": f"开始时间默认一周前:{GetDistributedTrainingTool.get_start_week_time()}",
+                    "default": f"开始时间默认一周前:{BaseTool.get_formatted_time(offset_days=-7)}",
                     "required": "True"
                 },
                 "limit": {
@@ -56,37 +48,21 @@ class GetDistributedTrainingTool(BaseTool):
                     "description": "区域",
                     "default": "默认为xb3，可选xb2,hb2",
                     "required": "True"
-                },
-                "owner": {
-                    "type": "string",
-                    "description": "所有者",
-                    "default": settings.user_id,
-                    "required": "True"
-                },
-                "user_id": {
-                    "type": "string",
-                    "description": "用户ID",
-                    "default": settings.user_id,
-                    "required": "True"
                 }
             }
         }
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
-        end_at = arguments.get("end_at", self.get_current_time())
-        start_at = arguments.get("start_at", self.get_start_week_time())
+        end_at = arguments.get("end_at", BaseTool.get_formatted_time())
+        start_at = arguments.get("start_at", BaseTool.get_formatted_time(offset_days=-7))
         limit = arguments.get("limit", 10)
         offset = arguments.get("offset", 0)
         zone = arguments.get("zone", "xb3")
-        owner = arguments.get("owner", settings.user_id)
-        user_id = arguments.get("user_id", settings.user_id)
 
-        url_path = f"/aicp/trains/namespaces/{user_id.lower()}/trains"
+        url_path = f"/aicp/trains/namespaces/{settings.user_id.lower()}/trains"
 
         params = {
             "zone": zone,
-            "owner": owner,
-            "user_id": user_id,
             "end_at": end_at,
             "start_at": start_at,
             "limit": limit,
@@ -121,15 +97,6 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
     tool_description = "返回分布式训练任务的详细日志"
 
     @staticmethod
-    def get_current_time() -> str:
-        # 1745303982000000000,纳秒时间戳
-        return int(datetime.datetime.now().timestamp() * 1000000000)
-
-    @staticmethod
-    def get_start_time() -> str:
-        return int((datetime.datetime.now() - datetime.timedelta(hours=12)).timestamp() * 1000000000)
-
-    @staticmethod
     def model_json_schema() -> Dict[str, Any]:
         return {
             "type": "object",
@@ -137,14 +104,14 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
                 "end_time": {
                     "type": "string",
                     "description": "结束时间",
-                    "default": f"结束时间默认当前时间:{GetDistributedTrainingDetailLogTool.get_current_time()}",
-                    "required": "True"
+                    "default": f"使用时间戳，当前时间:{BaseTool.get_formatted_time(nano_timestamp=True)}",
+                    "required": "False"
                 },
                 "start_time": {
                     "type": "string",
                     "description": "开始时间",
-                    "default": f"开始时间默认12小时前:{GetDistributedTrainingDetailLogTool.get_start_time()}",
-                    "required": "True"
+                    "default": f"使用时间戳，12小时前:{BaseTool.get_formatted_time(offset_hours=-12, nano_timestamp=True)}",
+                    "required": "False"
                 },
                 "fuzzy": {
                     "type": "boolean",
@@ -192,8 +159,8 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
         }
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
-        end_time = arguments.get("end_time", self.get_current_time())
-        start_time = arguments.get("start_time", self.get_start_time())
+        end_time = arguments.get("end_time")
+        start_time = arguments.get("start_time")
         fuzzy = arguments.get("fuzzy", True)
         reverse = arguments.get("reverse", True)
         size = arguments.get("size", 100)
@@ -208,13 +175,15 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
             "zone": zone,
             "owner": owner,
             "user_id": user_id,
-            "end_time": end_time,
-            "start_time": start_time,
             "fuzzy": fuzzy,
             "reverse": reverse,
             "size": size,
             "train_uuid": train_uuid
         }
+        if end_time:
+            params["end_time"] = end_time
+        if start_time:
+            params["start_time"] = start_time
 
         signed_query = get_signature(
             method="GET",
