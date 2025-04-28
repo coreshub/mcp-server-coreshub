@@ -1,12 +1,12 @@
 [project]
 name = "coreshub-mcp-server"
 version = "0.1.0"
-description = "A lightweight and extensible Model Context Protocol server framework"
+description = "A lightweight mcp server for coreshub."
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{ name = "eddic" }]
-maintainers = [{ name = "eddic", email = "email@example.com" }]
-keywords = ["mcp", "llm", "plugin", "extensible"]
+authors = [{ name = "coreshub" }]
+maintainers = [{ name = "coreshub"}]
+keywords = ["mcp", "llm", "plugin", "extensible", "coreshub"]
 license = { text = "MIT" }
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -31,3 +31,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/coreshub_mcp_server"]
+
+[project.urls]
+Homepage = "https://www.coreshub.cn/"
+Repository = "https://github.com/coreshub/mcp-server-coreshub"
