@@ -9,5 +9,4 @@ class Settings:
     user_id = os.getenv("CORESHUB_USER_ID","")
 
 
-# 创建单例配置实例
 settings = Settings()
