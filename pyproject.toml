@@ -31,3 +31,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/coreshub_mcp_server"]
+
+[project.urls]
+Homepage = "https://www.coreshub.cn/"
+Repository = "https://github.com/coreshub/mcp-server-coreshub"
