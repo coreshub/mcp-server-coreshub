@@ -24,6 +24,30 @@ src/coreshub_mcp_server/
 
 > 在Cherry Studio的设置——MCP服务器——编辑MCP配置
 
+推荐从pypi拉取
+
+```json
+{
+    "mcpServers": {
+        "coreshub-mcp-server-来自pypi包": {
+            "type": "stdio",
+            "registryUrl": "http://mirrors.aliyun.com/pypi/simple/",
+            "command": "uvx",
+            "args": [
+                "coreshub-mcp-server"
+            ],
+            "env": {
+                "QY_ACCESS_KEY_ID": "基石智算的AK",
+                "QY_SECRET_ACCESS_KEY": "基石智算的SK",
+                "CORESHUB_USER_ID": "基石智算的账户ID"
+            }
+        }
+    }
+}
+```
+
+或者从github拉取
+
 ```json
 {
   "mcpServers": {
