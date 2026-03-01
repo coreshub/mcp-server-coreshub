@@ -8,6 +8,7 @@ from mcp.types import TextContent
 from coreshub_mcp_server.base_plugin import BaseTool
 from coreshub_mcp_server.settings import settings
 from coreshub_mcp_server.utils.signature import get_signature
+from coreshub_mcp_server.utils.zones import get_zone_schema_description, get_default_zone
 
 
 class GetDistributedTrainingTool(BaseTool):
@@ -18,38 +19,34 @@ class GetDistributedTrainingTool(BaseTool):
     def model_json_schema() -> Dict[str, Any]:
         return {
             "type": "object",
+            "required": ["zone", "end_at", "start_at", "limit", "offset"],
             "properties": {
                 "end_at": {
                     "type": "string",
                     "description": "结束时间",
                     "default": f"结束时间默认当前时间:{BaseTool.get_formatted_time()}",
-                    "required": "True"
                 },
                 "start_at": {
                     "type": "string",
                     "description": "开始时间",
                     "default": f"开始时间默认一周前:{BaseTool.get_formatted_time(offset_days=-7)}",
-                    "required": "True"
                 },
                 "limit": {
                     "type": "integer",
                     "description": "每页显示的条数",
                     "default": 10,
-                    "required": "True"
                 },
                 "offset": {
                     "type": "integer",
                     "description": "偏移量",
                     "default": 0,
-                    "required": "True"
                 },
                 "zone": {
                     "type": "string",
-                    "description": "区域",
-                    "default": "默认为xb3，可选xb2,hb2",
-                    "required": "True"
-                }
-            }
+                    "description": get_zone_schema_description(),
+                    "default": get_default_zone(),
+                },
+            },
         }
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
@@ -57,7 +54,7 @@ class GetDistributedTrainingTool(BaseTool):
         start_at = arguments.get("start_at", BaseTool.get_formatted_time(offset_days=-7))
         limit = arguments.get("limit", 10)
         offset = arguments.get("offset", 0)
-        zone = arguments.get("zone", "xb3")
+        zone = arguments.get("zone", get_default_zone())
 
         url_path = f"/aicp/trains/namespaces/{settings.user_id.lower()}/trains"
 
@@ -66,7 +63,7 @@ class GetDistributedTrainingTool(BaseTool):
             "end_at": end_at,
             "start_at": start_at,
             "limit": limit,
-            "offset": offset
+            "offset": offset,
         }
 
         signed_query = get_signature(
@@ -74,7 +71,7 @@ class GetDistributedTrainingTool(BaseTool):
             url=url_path,
             ak=settings.access_key,
             sk=settings.secret_key,
-            params=params
+            params=params,
         )
 
         full_url = f"{settings.base_url}{url_path}?{signed_query}"
@@ -100,62 +97,53 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
     def model_json_schema() -> Dict[str, Any]:
         return {
             "type": "object",
+            "required": ["zone", "reverse", "size", "train_uuid", "owner", "user_id"],
             "properties": {
                 "end_time": {
                     "type": "string",
                     "description": "结束时间",
                     "default": f"使用时间戳，当前时间:{BaseTool.get_formatted_time(nano_timestamp=True)}",
-                    "required": "False"
                 },
                 "start_time": {
                     "type": "string",
                     "description": "开始时间",
                     "default": f"使用时间戳，12小时前:{BaseTool.get_formatted_time(offset_hours=-12, nano_timestamp=True)}",
-                    "required": "False"
                 },
                 "fuzzy": {
                     "type": "boolean",
                     "description": "是否模糊",
                     "default": True,
-                    "required": "False"
                 },
                 "reverse": {
                     "type": "boolean",
                     "description": "是否反转",
                     "default": True,
-                    "required": "True"
                 },
                 "size": {
                     "type": "integer",
                     "description": "每页显示的条数",
                     "default": 100,
-                    "required": "True"
                 },
                 "train_uuid": {
                     "type": "string",
-                    "description": "训练ID",
-                    "default": "来自上下文train_uuid，如果上下文没有，则需要询问，从get_distributed_training获取",
-                    "required": "True"
+                    "description": "训练ID，来自上下文train_uuid，如果上下文没有，则需要询问，从get_distributed_training获取",
                 },
                 "zone": {
                     "type": "string",
-                    "description": "区域",
-                    "default": "默认为xb3，可选xb2、hb2",
-                    "required": "True"
+                    "description": get_zone_schema_description(),
+                    "default": get_default_zone(),
                 },
                 "owner": {
                     "type": "string",
                     "description": "所有者",
                     "default": settings.user_id,
-                    "required": "True"
                 },
                 "user_id": {
                     "type": "string",
                     "description": "用户ID",
                     "default": settings.user_id,
-                    "required": "True"
-                }
-            }
+                },
+            },
         }
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
@@ -165,7 +153,7 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
         reverse = arguments.get("reverse", True)
         size = arguments.get("size", 100)
         train_uuid = arguments.get("train_uuid", "")
-        zone = arguments.get("zone", "xb3")
+        zone = arguments.get("zone", get_default_zone())
         owner = arguments.get("owner", settings.user_id)
         user_id = arguments.get("user_id", settings.user_id)
 
@@ -178,7 +166,7 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
             "fuzzy": fuzzy,
             "reverse": reverse,
             "size": size,
-            "train_uuid": train_uuid
+            "train_uuid": train_uuid,
         }
         if end_time:
             params["end_time"] = end_time
@@ -190,7 +178,7 @@ class GetDistributedTrainingDetailLogTool(BaseTool):
             url=url_path,
             ak=settings.access_key,
             sk=settings.secret_key,
-            params=params
+            params=params,
         )
 
         full_url = f"{settings.base_url}{url_path}?{signed_query}"

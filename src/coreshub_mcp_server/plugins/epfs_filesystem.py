@@ -5,6 +5,7 @@ import requests
 from coreshub_mcp_server.base_plugin import BaseTool
 from coreshub_mcp_server.settings import settings
 from coreshub_mcp_server.utils.signature import get_signature
+from coreshub_mcp_server.utils.zones import get_zone_schema_description, get_default_zone
 from mcp.types import TextContent
 
 
@@ -16,30 +17,28 @@ class GetEpfsFilesystemTool(BaseTool):
     def model_json_schema() -> Dict[str, Any]:
         return {
             "type": "object",
+            "required": ["zone", "owner", "user_id"],
             "properties": {
                 "zone": {
                     "type": "string",
-                    "description": "区域标识，从上下文获取，选项：xb3,xb2,hb2",
-                    "default": "xb3",
-                    "required": "True"
+                    "description": get_zone_schema_description(),
+                    "default": get_default_zone(),
                 },
                 "owner": {
                     "type": "string",
                     "description": "用户名",
                     "default": settings.user_id,
-                    "required": "True"
                 },
                 "user_id": {
                     "type": "string",
                     "description": "容器实例的拥有者ID，可以从上下文字段user_id获取",
                     "default": settings.user_id,
-                    "required": "True"
-                }
-            }
+                },
+            },
         }
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
-        zone = arguments.get("zone", "xb3")
+        zone = arguments.get("zone", get_default_zone())
         owner = arguments.get("owner", settings.user_id)
         user_id = arguments.get("user_id", settings.user_id)
         limit = arguments.get("limit", 10)
@@ -52,7 +51,7 @@ class GetEpfsFilesystemTool(BaseTool):
             "owner": owner,
             "user_id": user_id,
             "limit": limit,
-            "offset": offset
+            "offset": offset,
         }
 
         signed_query = get_signature(
@@ -60,7 +59,7 @@ class GetEpfsFilesystemTool(BaseTool):
             url=url_path,
             ak=settings.access_key,
             sk=settings.secret_key,
-            params=params
+            params=params,
         )
 
         full_url = f"{settings.base_url}{url_path}?{signed_query}"
@@ -85,35 +84,32 @@ class GetEpfsBillInfoTool(BaseTool):
     def model_json_schema() -> Dict[str, Any]:
         return {
             "type": "object",
+            "required": ["resource_id", "zone", "owner", "user_id"],
             "properties": {
                 "resource_id": {
                     "type": "string",
                     "description": "资源ID,从上下文resource_id字段获取",
-                    "required": "True"
                 },
                 "zone": {
                     "type": "string",
-                    "description": "区域标识，从上下文获取，选项：xb3,xb2,hb2",
-                    "default": "xb3",
-                    "required": "True"
+                    "description": get_zone_schema_description(),
+                    "default": get_default_zone(),
                 },
                 "owner": {
                     "type": "string",
                     "description": "用户名",
                     "default": settings.user_id,
-                    "required": "True"
                 },
                 "user_id": {
                     "type": "string",
                     "description": "容器实例的拥有者ID，从上下文字段user_id获取",
                     "default": settings.user_id,
-                    "required": "True"
-                }
-            }
+                },
+            },
         }
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
-        zone = arguments.get("zone", "xb3")
+        zone = arguments.get("zone", get_default_zone())
         owner = arguments.get("owner", settings.user_id)
         user_id = arguments.get("user_id", settings.user_id)
         resource_id = arguments.get("resource_id", "")
@@ -128,7 +124,7 @@ class GetEpfsBillInfoTool(BaseTool):
             "user_id": user_id,
             "resource_id": resource_id,
             "offset": offset,
-            "limit": limit
+            "limit": limit,
         }
 
         signed_query = get_signature(
@@ -136,7 +132,7 @@ class GetEpfsBillInfoTool(BaseTool):
             url=url_path,
             ak=settings.access_key,
             sk=settings.secret_key,
-            params=params
+            params=params,
         )
 
         full_url = f"{settings.base_url}{url_path}?{signed_query}"

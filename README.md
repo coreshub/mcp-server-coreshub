@@ -5,8 +5,10 @@
 ```
 src/coreshub_mcp_server/
 ├── plugins/           # 插件目录，所有工具和提示插件
+│   └── zones.py       # 可用区域 Prompt 插件
 ├── utils/             # 工具函数
-│   └── signature.py   # 签名工具函数
+│   ├── signature.py   # 签名工具函数
+│   └── zones.py       # 区域配置（单一来源）
 ├── base_plugin.py     # 工具和提示基类
 ├── settings.py        # 配置管理
 └── server.py          # MCP服务器实现
@@ -39,7 +41,8 @@ src/coreshub_mcp_server/
             "env": {
                 "QY_ACCESS_KEY_ID": "基石智算的AK",
                 "QY_SECRET_ACCESS_KEY": "基石智算的SK",
-                "CORESHUB_USER_ID": "基石智算的账户ID"
+                "CORESHUB_USER_ID": "基石智算的账户ID",
+                "CORESHUB_ZONES": "xb3:西北3区,xb2:西北2区,hb2:华北2区"
             }
         }
     }
@@ -63,7 +66,8 @@ src/coreshub_mcp_server/
       "env": {
         "QY_ACCESS_KEY_ID": "基石智算的AK",
         "QY_SECRET_ACCESS_KEY": "基石智算的SK",
-        "CORESHUB_USER_ID": "基石智算的账户ID"
+        "CORESHUB_USER_ID": "基石智算的账户ID",
+        "CORESHUB_ZONES": "xb3:西北3区,xb2:西北2区,hb2:华北2区"
       }
     }
   }
@@ -101,6 +105,7 @@ cd 项目根目录路径 && uv run coreshub-mcp-server
 QY_ACCESS_KEY_ID=基石智算的AK
 QY_SECRET_ACCESS_KEY=基石智算的SK
 CORESHUB_USER_ID=基石智算的账户ID
+CORESHUB_ZONES=xb3:西北3区,xb2:西北2区,hb2:华北2区
 ```
 
 ##### 对于windows系统:
@@ -130,6 +135,7 @@ cd 项目根目录路径 && uv run coreshub-mcp-server
 QY_ACCESS_KEY_ID=基石智算的AK
 QY_SECRET_ACCESS_KEY=基石智算的SK
 CORESHUB_USER_ID=基石智算的账户ID
+CORESHUB_ZONES=xb3:西北3区,xb2:西北2区,hb2:华北2区
 ```
 
 ### 场景二：命令行操作（需实现client）
@@ -151,6 +157,7 @@ class Settings:
 export QY_ACCESS_KEY_ID="基石智算的AK"
 export QY_SECRET_ACCESS_KEY="基石智算的SK"
 export CORESHUB_USER_ID="基石智算的账户ID"
+export CORESHUB_ZONES="xb3:西北3区,xb2:西北2区,hb2:华北2区"
 ```
 
 #### （2）在项目根目录使用 [`uv`](https://docs.astral.sh/uv/)检查服务状态
@@ -165,7 +172,34 @@ uv run src/coreshub_mcp_server
 - `--list-plugins`: 列出所有已加载的插件
 - `--log-file`: 指定日志文件路径
 
-## 3、开发
+## 3、区域配置（CORESHUB_ZONES）
+
+所有工具的 `zone` 参数均从**统一配置**中读取，新增区域时只需更新环境变量，**无需修改任何插件代码**。
+
+### 配置格式
+
+```
+zone_id:区域描述,zone_id:区域描述,...
+```
+
+示例——上线上海1区（sh1）后：
+
+```bash
+CORESHUB_ZONES="xb3:西北3区,xb2:西北2区,hb2:华北2区,sh1:上海1区"
+```
+
+### 说明
+
+| 字段 | 说明 |
+|---|---|
+| `zone_id` | 区域标识，即工具调用时填入 `zone` 参数的值 |
+| `区域描述` | 供模型理解区域含义的中文说明 |
+
+- **不设置该变量时**，使用内置默认值：`xb3:西北3区,xb2:西北2区,hb2:华北2区`
+- **修改后需重启 MCP 服务**，变更才会生效
+- 模型在 zone 信息不明确时，可主动调用 **`available_zones`** prompt 查看最新区域列表
+
+## 4、开发
 
 ### 1、添加新工具
 

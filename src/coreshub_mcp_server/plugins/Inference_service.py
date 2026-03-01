@@ -6,6 +6,7 @@ import requests
 from coreshub_mcp_server.base_plugin import BaseTool
 from coreshub_mcp_server.settings import settings
 from coreshub_mcp_server.utils.signature import get_signature
+from coreshub_mcp_server.utils.zones import get_zone_schema_description, get_default_zone
 from mcp.types import TextContent
 
 
@@ -18,42 +19,38 @@ class GetInferenceServiceTool(BaseTool):
 
         return {
             "type": "object",
+            "required": ["zone", "owner"],
             "properties": {
                 "zone": {
                     "type": "string",
-                    "description": "区域标识，从上下文获取，选项：xb3,xb2,hb2",
-                    "default": "xb3",
-                    "required": "True"
+                    "description": get_zone_schema_description(),
+                    "default": get_default_zone(),
                 },
                 "owner": {
                     "type": "string",
                     "description": "用户名",
                     "default": settings.user_id,
-                    "required": "True"
                 },
                 "key_words": {
                     "type": "string",
                     "description": "关键字",
                     "default": "",
-                    "required": "False"
                 },
                 "page": {
                     "type": "integer",
                     "description": "页码",
                     "default": 1,
-                    "required": "False"
                 },
                 "size": {
                     "type": "integer",
                     "description": "每页数量",
                     "default": 10,
-                    "required": "False"
-                }
-            }
+                },
+            },
         }
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
-        zone = arguments.get("zone", "xb3")
+        zone = arguments.get("zone", get_default_zone())
         owner = arguments.get("owner", settings.user_id)
         key_words = arguments.get("key_words", "")
         page = arguments.get("page", 1)
@@ -66,7 +63,7 @@ class GetInferenceServiceTool(BaseTool):
             "owner": owner,
             "key_words": key_words,
             "page": page,
-            "size": size
+            "size": size,
         }
 
         signed_query = get_signature(
@@ -74,7 +71,7 @@ class GetInferenceServiceTool(BaseTool):
             url=url_path,
             ak=settings.access_key,
             sk=settings.secret_key,
-            params=params
+            params=params,
         )
 
         full_url = f"{settings.base_url}{url_path}?{signed_query}"
@@ -97,58 +94,49 @@ class GetInferenceServiceLogTool(BaseTool):
 
     @staticmethod
     def model_json_schema() -> Dict[str, Any]:
-        # 获取当前UTC时间
         return {
             "type": "object",
+            "required": ["zone", "owner", "service_id", "size", "reverse"],
             "properties": {
                 "start_time": {
                     "type": "string",
                     "description": "开始UTC时间",
                     "default": f"开始时间默认24小时前{BaseTool.get_formatted_time(time_format='%Y-%m-%dT%H:%M:%S.000Z', offset_days=-1, use_utc=True)}",
-                    "required": "非必须"
                 },
                 "end_time": {
                     "type": "string",
                     "description": "结束UTC时间",
                     "default": f"结束时间默认当前时间{BaseTool.get_formatted_time(time_format='%Y-%m-%dT%H:%M:%S.000Z', use_utc=True)}",
-                    "required": "非必须"
                 },
                 "zone": {
                     "type": "string",
-                    "description": "区域标识，从上下文获取，选项：xb3,xb2,hb2",
-                    "default": "xb3",
-                    "required": "True"
+                    "description": get_zone_schema_description(),
+                    "default": get_default_zone(),
                 },
                 "owner": {
                     "type": "string",
                     "description": "用户名",
                     "default": settings.user_id,
-                    "required": "True"
                 },
                 "service_id": {
                     "type": "string",
-                    "description": "服务ID",
-                    "default": "来自上下文service_id，如果上下文没有，则需要询问，从get_inference_service获取",
-                    "required": "True"
+                    "description": "服务ID，来自上下文service_id，如果上下文没有，则需要询问，从get_inference_service获取",
                 },
                 "size": {
                     "type": "integer",
                     "description": "每页数量",
                     "default": 100,
-                    "required": "True"
                 },
                 "reverse": {
                     "type": "boolean",
                     "description": "是否反转",
                     "default": True,
-                    "required": "True"
-                }
-
-            }
+                },
+            },
         }
 
     async def execute_tool(self, arguments: dict) -> List[TextContent]:
-        zone = arguments.get("zone", "xb3")
+        zone = arguments.get("zone", get_default_zone())
         owner = arguments.get("owner", settings.user_id)
         service_id = arguments.get("service_id", "")
         size = arguments.get("size", 100)
@@ -163,7 +151,7 @@ class GetInferenceServiceLogTool(BaseTool):
             "owner": owner,
             "service_id": service_id,
             "size": size,
-            "reverse": reverse
+            "reverse": reverse,
         }
         if end_time:
             params["end_time"] = end_time
@@ -175,7 +163,7 @@ class GetInferenceServiceLogTool(BaseTool):
             url=url_path,
             ak=settings.access_key,
             sk=settings.secret_key,
-            params=params
+            params=params,
         )
 
         full_url = f"{settings.base_url}{url_path}?{signed_query}"
