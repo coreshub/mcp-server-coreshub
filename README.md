@@ -511,3 +511,128 @@ MyPrompt.register()
     - description: 结束UTC时间
     - default: 默认为当前时间，格式为%Y-%m-%dT%H:%M:%S.000Z
     - required: False
+
+### 9、get_imaas_models   查看大模型服务广场上所有可调用的模型列表
+
+- zone
+    - type: string
+    - description: 区域标识，可用区域从 `CORESHUB_ZONES` 配置读取
+    - default: xb3
+    - required: True
+- owner
+    - type: string
+    - description: 账户 ID，从上下文 owner/user_id 获取
+    - default: CORESHUB_USER_ID 配置值
+    - required: True
+- key_words
+    - type: string
+    - description: 按模型名称关键字模糊搜索
+    - default: ""
+    - required: False
+- model_tag
+    - type: string
+    - description: 按模型类型标签筛选，逗号分隔多个标签。可选值：`txt2txt`、`txt2img`、`txt2video`、`img2video`、`audio`、`embedding`、`rerank`、`crossmodel`。留空返回全部类型
+    - default: "txt2txt,txt2img,txt2video,img2video,audio,embedding,rerank,crossmodel"
+    - required: False
+- page
+    - type: integer
+    - description: 页码，从 1 开始
+    - default: 1
+    - required: False
+- size
+    - type: integer
+    - description: 每页返回数量
+    - default: 100
+    - required: False
+
+### 10、get_imaas_apikeys   查看当前账户的 iMaaS API Key 列表
+
+- zone
+    - type: string
+    - description: 区域标识
+    - default: xb3
+    - required: True
+- owner
+    - type: string
+    - description: 账户 ID，从上下文 owner/user_id 获取
+    - default: CORESHUB_USER_ID 配置值
+    - required: True
+- key_words
+    - type: string
+    - description: 按 API Key 名称关键字模糊搜索
+    - default: ""
+    - required: False
+- page
+    - type: integer
+    - description: 页码，从 1 开始
+    - default: 1
+    - required: False
+- size
+    - type: integer
+    - description: 每页返回数量
+    - default: 10
+    - required: False
+
+### 11、get_imaas_model_detail   获取单个 iMaaS 模型的详细信息
+
+- model_id
+    - type: string
+    - description: 模型 ID，从 `get_imaas_models` 返回的 `id` 字段获取，格式如 `md-tDz8i3XJ`
+    - required: True
+- zone
+    - type: string
+    - description: 区域标识
+    - default: xb3
+    - required: True
+- owner
+    - type: string
+    - description: 账户 ID，从上下文 owner/user_id 获取
+    - default: CORESHUB_USER_ID 配置值
+    - required: True
+
+### 12、get_imaas_token_metrics   查询 iMaaS 用量统计数据
+
+- zone
+    - type: string
+    - description: 区域标识
+    - default: xb3
+    - required: True
+- owner
+    - type: string
+    - description: 账户 ID，从上下文 owner/user_id 获取
+    - default: CORESHUB_USER_ID 配置值
+    - required: True
+- start_time
+    - type: integer
+    - description: 查询开始时间，Unix 时间戳（秒）
+    - required: True
+- end_time
+    - type: integer
+    - description: 查询结束时间，Unix 时间戳（秒），默认当前时间
+    - required: False
+- aggr_type
+    - type: string
+    - description: 数据汇总方式。`range`（默认）返回每时间段增量值 + result[].sum 汇总；`sum` 使用 Prometheus increase() 返回滚动增量，数值含义较复杂，一般不推荐
+    - enum: ["range", "sum"]
+    - default: range
+    - required: False
+- api_key
+    - type: string
+    - description: 按 API Key 筛选，支持多个（逗号分隔）。留空表示所有
+    - default: ""
+    - required: False
+- model
+    - type: string
+    - description: 按模型名称筛选，支持多个（逗号分隔）。留空表示所有模型
+    - default: ""
+    - required: False
+- token_type
+    - type: string
+    - description: 按计量类型筛选，支持多个（逗号分隔）：`input`（输入）、`output`（输出）、`cached`（缓存命中）。留空返回全部类型（input+output+cached 合并）
+    - default: ""
+    - required: False
+- unit
+    - type: string
+    - description: 计费单位，支持多个（逗号分隔）：`token`（文本类）、`count`（图片/视频类）、`seconds`（音频/视频类）、`words`（字数）。留空表示所有单位
+    - default: ""
+    - required: False
